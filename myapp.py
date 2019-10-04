@@ -1,1 +1,2 @@
-from app import app, celery
+from app import app
+

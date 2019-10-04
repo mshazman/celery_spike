@@ -1,30 +1,15 @@
-from flask import Flask
-from config import Config
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
-from celery import Celery
+from flask import Flask, url_for
 
 app = Flask(__name__)
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+
+from app import tasks
 
 
-def make_celery(app):
-    celery = Celery(
-        'worker',
-        broker='redis://localhost:6379/'
-    )
-    celery.conf.update(app.config)
+@app.route('/')
+def index():
+    return 'Welcome to Celery'
 
-    class ContextTask(celery.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
+@app.route('/task/<time>')
+def task(time):
+    return tasks.example(int(time))
 
-    celery.Task = ContextTask
-    return celery
-
-celery = make_celery(app)
-
-
-from app import models, routes, tasks
