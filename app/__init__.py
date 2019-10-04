@@ -1,14 +1,24 @@
 from flask import Flask, jsonify, send_file, Response, flash, redirect, url_for, render_template
 from celery import Celery
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+import os
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 app = Flask(__name__)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'app.db')
 app.config['SECRET_KEY'] = 'xfcghjokcgvjhkfgchjkl'
 app.config['CELERY_IMPORTS'] = 'app.tasks'
 app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379'
 app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379'
 app.config['CELERY_TASK_SERIALIZER'] = 'json'
 app.config['CELERY_ACCEPT_CONTENT'] = ['application/json']
+
+
+db = SQLAlchemy(app)
+migrate = Migrate(app,db)
 
 def make_celery(app):
     celery = Celery(app.import_name, backend=app.config['CELERY_RESULT_BACKEND'],
@@ -25,12 +35,14 @@ def make_celery(app):
 
 celery = make_celery(app)
 
-from app import tasks
+from app import tasks, models
 
+from app.models import Task
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    tasks = Task.query.all()
+    return render_template('index.html', tasks=tasks)
 
 @app.route('/extract')
 def extract():
@@ -38,6 +50,9 @@ def extract():
     dic = {}
     dic['id'] = task.id
     # return jsonify(dic)
+    task_db = Task(id=task.id)
+    db.session.add(task_db)
+    db.session.commit()
     flash(f'Task Created...{task.id}')
     return redirect(url_for('index'))
 

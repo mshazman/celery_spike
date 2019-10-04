@@ -27,6 +27,32 @@
     <br>
     <a href="/extract"><button class="btn btn-md btn-info">Create Task</button></a>
 </div>
-
+<div class="container">
+  <h2>Tasks</h2>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Task ID</th>
+        <th>Status</th>
+        <th>Download</th>
+      </tr>
+    </thead>
+    <tbody>
+    <br>
+    {% for task in tasks %}
+      <tr>
+        <td>{{task.id}}</td>
+        <td>{{task.get_status()}}</td>
+          {% if task.get_status()=='SUCCESS'%}
+            <td><a href="{{url_for('result', task_id=task.id)}}">Download</a></td>
+          {% else %}
+            <td><a href="#">Refresh</a></td>
+          {% endif %}
+          <td><a href="{{url_for('status', task_id=task.id)}}">Status Page</a></td>
+      </tr>
+      {% endfor%}
+    </tbody>
+  </table>
+</div>
 </body>
 </html>
