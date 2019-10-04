@@ -1,6 +1,6 @@
 from app import app
-
+from app.tasks import *
 
 @app.route('/')
 def index():
-    return "Hello World"
+    return example(5)
