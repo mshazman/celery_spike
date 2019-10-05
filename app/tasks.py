@@ -30,5 +30,5 @@ def extract_matches():
     filepath = './app/files/'+ filename
     with open(filepath, 'w') as file:
         json.dump(matches_won_by_team, file)
-    time.sleep(30)
+    time.sleep(10)
     return filename

@@ -54,13 +54,17 @@ def extract():
     db.session.add(task_db)
     db.session.commit()
     flash(f'Task Created...{task.id}')
-    return redirect(url_for('index'))
+    return jsonify(dic)
+    # return redirect(url_for('index'))
 
 @app.route('/task/status/<task_id>')
 def status(task_id):
     task = celery.AsyncResult(task_id)
     flash(task.state)
-    return render_template('status.html', task_state=task.state, task_id=task.id)
+    # return render_template('status.html', task_state=task.state, task_id=task.id)
+    dic = {}
+    dic['state'] = task.state
+    return jsonify(dic)
 
 
 @app.route('/task/result/<task_id>')
